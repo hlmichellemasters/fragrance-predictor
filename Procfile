@@ -1,1 +1,1 @@
-web: gunicorn fragrance_project.wsgi
+web: gunicorn fragrance_project.wsgi --log-file -
