@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure--n0zu%3i3fg9@ka_6u(vydhe5vf$e_glq(1jwy6svziliktn^%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['indie-fragrance-predictor.herokuapp.com']
+ALLOWED_HOSTS = ['https://fragrance-predictor.herokuapp.com/']
 # , '127.0.0.1:8000', '127.0.0.1'
 
 
