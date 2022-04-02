@@ -165,7 +165,7 @@ AWS_S3_REGION_NAME = 'us-east-2'
 AWS_S3_ADDRESSING_STYLE = 'virtual'
 AWS_S3_SIGNATURE_VERSION = 's3v4'
 
-django_on_heroku.settings(locals())
+django_on_heroku.settings(locals(), staticfiles=False)
 
 
 
