@@ -8,11 +8,14 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import MultinomialNB
 
 from users.models import Profile
 from .forms import ReviewForm
 from .models import Perfume, Preference
+from . import recommendations as rec
 
 import pandas as pd
 
@@ -182,22 +185,20 @@ def add_preference(request, pk):
 # showcasing recommendations just for michellem user first
 @login_required
 def user_recommendation_list(request):
-    # hard-coding just default user for now
-    user = User.objects.filter(username='michellem').first()
+    user = request.user
 
     # gets the profile of the user
     profile = Profile.objects.filter(user=user).first()
     reviews_df = profile.preference_dataframe()
     perfumes_df = pd.DataFrame.from_records(Perfume.objects.all().values('id', 'name', 'house', 'description'))
+    perfumes_df = rec.add_features_to_perfume_dataframe(perfumes_df)
 
     # inner join the perfume and review data to include all important columns for reviewed perfumes
     perfume_reviews_df = pd.merge(reviews_df, perfumes_df, how='inner', left_on='perfume_id', right_on='id')
 
-    # to display the data in the template
-    html_data = perfume_reviews_df.to_html()
-
+    # split the data for training and testing
     train_data, test_data, train_labels, test_labels = \
-        train_test_split(perfume_reviews_df['description'].values.astype('U'), perfume_reviews_df['love'],
+        train_test_split(perfume_reviews_df['features'].values.astype('U'), perfume_reviews_df['love'],
                          test_size=0.2, random_state=1)
 
     counter = CountVectorizer(stop_words='english')
@@ -207,21 +208,31 @@ def user_recommendation_list(request):
 
     length_train = len(train_data)
     length_test = len(test_data)
-    #
-    # classifier = MultinomialNB()
-    # classifier.fit(train_counts, train_labels)
-    #
-    #
-    # predictions = classifier.predict(test_counts)
-    #
-    # print("Accuracy score: " + str(accuracy_score(test_labels, predictions)))
+
+    classifier = MultinomialNB()
+    classifier.fit(train_counts, train_labels)
+
+    predictions = classifier.predict(test_counts)
+
+    accuracy_string = "Accuracy score: " + str(accuracy_score(test_labels, predictions))
+
+    # estimate probabilities for remaining perfumes (that user hasn't yet reviewed)
+    unreviewed_perfumes_df = perfumes_df[~perfumes_df.id.isin(perfume_reviews_df.perfume_id)]
+    html_data = unreviewed_perfumes_df.to_html()
+    unreviewed_perfumes_data = counter.transform(unreviewed_perfumes_df['features'].values.astype('U'))
+    unreviewed_perfumes_df['love_probability'] = classifier.predict_proba(unreviewed_perfumes_data)[:, 1]
+    sorted_recommendations_df = unreviewed_perfumes_df.sort_values(by=['love_probability'], ascending=False)
+    html_data = sorted_recommendations_df.to_html()
+
     return render(request, 'predictor/user_recommendation_list.html', {'username': request.user.username,
                                                                        'reviews': reviews_df,
                                                                        'lengthDF': len(reviews_df),
                                                                        'lengthTrain': len(train_data),
                                                                        'lengthTest': len(test_data),
                                                                        'perfumes': perfumes_df,
-                                                                       'perfumeReviews': html_data
+                                                                       'unreviewedPerfumes': unreviewed_perfumes_df,
+                                                                       'table': html_data,
+                                                                       'accuracyScore': accuracy_string
                                                                        })
 
 

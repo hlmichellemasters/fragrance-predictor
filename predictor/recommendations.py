@@ -13,8 +13,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# get the user review data from the database and create dataframe for further analysis
+def add_features_to_perfume_dataframe(dataframe):
+    features = []
+    for i in range(0, dataframe.shape[0]):
+        new_feature = ' ' + dataframe['name'][i] + ' ' + dataframe['house'][i] + ' ' + dataframe['description'][i]
+        features.append(new_feature)
 
+    dataframe['features'] = features
+
+    return dataframe
 
 
 def split_and_vectorize_data(data, labels):

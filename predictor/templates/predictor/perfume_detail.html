@@ -8,7 +8,7 @@
 
     <img class="rounded-circle article-img" src="{{ perfume.added_by.profile.image.url }}">
     <div class="media-body">
-        <h2 class="article-title">{{ perfume.name }} by {{ perfume.house}}</h2>
+        <h4 class="article-title">{{ perfume.name }} by {{ perfume.house}}</h4>
         <p class="article-content">{{ perfume.description }}</p>
         {% if perfume.added_by == user %}
             <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'perfume-update' perfume.id %}"> Update </a>

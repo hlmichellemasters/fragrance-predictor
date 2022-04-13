@@ -8,12 +8,14 @@
 {% block content %}
 
 <!-- SCRATCH -->
+Lengths:
 {{ lengthDF }}
 {{ lengthTrain }}
 {{ lengthTest }}
+accuracy: {{ accuracyScore }}
 
 <!-- Turns off the escape from the html so the html is properly rendered for viewing -->
-{% autoescape off %} {{ perfumeReviews }} {% endautoescape %}
+{% autoescape off %} {{ table }} {% endautoescape %}
 
 
 <!-- SCRATCH -->
