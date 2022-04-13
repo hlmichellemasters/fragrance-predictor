@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from PIL import Image
+from pandas import DataFrame
+from predictor.models import Preference
 
 
 class Profile(models.Model):
@@ -10,14 +11,9 @@ class Profile(models.Model):
     def __str__(self):
         return f'{self.user.username} Profile'
 
-    # saves and resizes to a thumbnail
-#   def save(self, *args, **kwargs):
-#      super().save(*args, **kwargs)
+    def preference_dataframe(self) -> DataFrame:
+        # Get all review data, as a Pandas DataFrame object, for a given user
+        return DataFrame.from_records(Preference.objects.filter(user=self.user).values('user_id', 'perfume_id', 'love'))
 
-#     img = Image.open(self.image.path)
 
-#    if img.height > 300 or img.width > 300:
-    #       output_size = (300, 300)
-    #      img.thumbnail(output_size)
-    #     img.save(self.image.path)
 

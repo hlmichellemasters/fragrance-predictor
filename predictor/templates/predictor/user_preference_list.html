@@ -1,22 +1,26 @@
 {% extends "predictor/base.html" %}
 
 {% block content %}
-<h1> Preference List </h1>
+<h1> Preferences of {{ view.kwargs.username }} ({{ page_obj.paginator.count }}) </h1>
 
-{% if latest_preference_list %}
+{% if preferences %}
 <div>
-    {% for preference in latest_preference_list %}
+    {% for preference in preferences %}
         <article class="media content-section">
 
-            <img class="rounded-circle article-img" src="{{ preference.user.profile.image.url }}">
+            <!-- <img class="rounded-circle article-img" src="{{ preference.user.profile.image.url }}"> -->
             <div class="media-body">
-                <h3><a class="mr-2" href="{% url 'user-perfumes' preference.user.username %}">
-                        {{ preference.user.username }} </a>  {{ preference.love_string }}: <br>
+                <h4> {{ preference.user.username }}
+                    {% if preference.love %}
+                        loves
+                    {% else %}
+                        doesn't love
+                    {% endif %}:
                     <a class="article-title" href="{% url 'perfume-detail' preference.perfume.id %}">
-                        {{ preference.perfume.name }} by {{ preference.perfume.house}}</a></h3>
-                <p class="article-content">{{ preference.perfume.description }}</p>
+                        {{ preference.perfume.name }} by {{ preference.perfume.house}}</a></h4>
+                <!-- <p class="article-content">{{ preference.perfume.description }}</p> -->
                 <div class="article-metadata">
-                    <small class="text-muted"> Reviewed on {{ preference.modified_date|date:"F d, Y" }}</small>
+                    <small class="text-muted"> Reviewed on {{ preference.review_date|date:"F d, Y" }}</small>
                 </div>
             </div>
 

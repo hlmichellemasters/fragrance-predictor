@@ -1,0 +1,20 @@
+{% extends 'predictor/perfume_list.html' %}
+
+{% block title %}
+<h2> Recommendations for {{ username }} </h2>
+{% endblock %}
+
+
+{% block content %}
+
+<!-- SCRATCH -->
+{{ lengthDF }}
+{{ lengthTrain }}
+{{ lengthTest }}
+
+<!-- Turns off the escape from the html so the html is properly rendered for viewing -->
+{% autoescape off %} {{ perfumeReviews }} {% endautoescape %}
+
+
+<!-- SCRATCH -->
+{% endblock %}

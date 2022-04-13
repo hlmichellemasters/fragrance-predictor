@@ -36,12 +36,14 @@ INSTALLED_APPS = [
     'predictor.apps.PredictorConfig',
     'users.apps.UsersConfig',
     'crispy_forms',
+    'django_crontab',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'bootstrap4',
 ]
 
 MIDDLEWARE = [
