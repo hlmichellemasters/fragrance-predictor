@@ -1,0 +1,16 @@
+{% extends "predictor/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<div class="content-section">
+
+    <form method="POST">
+        {% csrf_token %}
+
+        {% for form in formset %}
+          {{ form }}
+          <hr>
+        {% endfor %}
+    </form>
+
+</div>
+{% endblock content%}
