@@ -35,7 +35,7 @@ def perfume_detail(request, pk):
 
 class PerfumeCreateView(LoginRequiredMixin, CreateView):
     model = Perfume
-    fields = ['name', 'house', 'description']
+    fields = ['name', 'house', 'house_link', 'description']
 
     def form_valid(self, form):
         form.instance.added_by = self.request.user
@@ -45,7 +45,7 @@ class PerfumeCreateView(LoginRequiredMixin, CreateView):
 
 class PerfumeUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Perfume
-    fields = ['name', 'house', 'description']
+    fields = ['name', 'house', 'house_link', 'description']
 
     def form_valid(self, form):
         form.instance.added_by = self.request.user

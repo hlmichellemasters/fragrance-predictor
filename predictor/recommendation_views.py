@@ -82,6 +82,7 @@ def recommendation_form(request):
     else:
         form = RecommendationForm()
 
+
     # if form.is_valid():
     #     review = form.save(commit=False)
     #     review.perfume = perfume

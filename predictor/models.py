@@ -2,12 +2,19 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse
-from pandas import DataFrame
+
+
+class House(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Perfume(models.Model):
     name = models.CharField(max_length=100)
     house = models.CharField(max_length=100)
+    house_link = models.ForeignKey(House, related_name='perfumes', null=True, on_delete=models.CASCADE)
     description = models.TextField()
     added_date = models.DateTimeField(default=timezone.now)
     added_by = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -22,7 +29,6 @@ class Perfume(models.Model):
 
     def get_absolute_url(self):
         return reverse('perfume-detail', kwargs={'pk':self.pk})
-
 
 
 class Preference(models.Model):

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Perfume, Preference
+from .models import Perfume, House, Preference
 
 
 class PreferenceAdmin(admin.ModelAdmin):
@@ -19,4 +19,4 @@ class PerfumeAdmin(admin.ModelAdmin):
 # Register your models here.
 admin.site.register(Perfume, PerfumeAdmin)
 admin.site.register(Preference, PreferenceAdmin)
-
+admin.site.register(House)
