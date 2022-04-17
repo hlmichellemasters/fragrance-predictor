@@ -11,6 +11,35 @@ from .models import Preference, User, Perfume
 import seaborn as sb
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
+
+
+def build_model_for_user(user, reviews_df):
+
+    perfumes_df = pd.DataFrame.from_records(Perfume.objects.all().values('id', 'name', 'house', 'description'))
+    perfumes_df = add_features_to_perfume_dataframe(perfumes_df)
+
+    # inner join the perfume and review data to include all important columns for reviewed perfumes
+    perfume_reviews_df = pd.merge(reviews_df, perfumes_df, how='inner', left_on='perfume_id', right_on='id')
+
+    # split the data for training and testing
+    train_data, test_data, train_labels, test_labels = \
+        train_test_split(perfume_reviews_df['features'].values.astype('U'), perfume_reviews_df['love'],
+                         test_size=0.2, random_state=1)
+
+    counter = CountVectorizer(stop_words='english')
+    counter.fit(train_data)
+    train_counts = counter.transform(train_data)
+    test_counts = counter.transform(test_data)
+
+    classifier = MultinomialNB()
+    classifier.fit(train_counts, train_labels)
+
+    predictions = classifier.predict(test_counts)
+
+    accuracy = accuracy_score(test_labels, predictions)
+
+    return classifier, accuracy, perfumes_df, perfume_reviews_df, counter
 
 
 def add_features_to_perfume_dataframe(dataframe):

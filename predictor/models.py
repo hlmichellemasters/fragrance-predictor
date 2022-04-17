@@ -24,6 +24,7 @@ class Perfume(models.Model):
         return reverse('perfume-detail', kwargs={'pk':self.pk})
 
 
+
 class Preference(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     perfume = models.ForeignKey(Perfume, on_delete=models.CASCADE)

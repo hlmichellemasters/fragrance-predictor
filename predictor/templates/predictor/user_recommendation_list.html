@@ -7,16 +7,39 @@
 
 {% block content %}
 
-<!-- SCRATCH -->
-Lengths:
+<!-- Lengths:
 {{ lengthDF }}
 {{ lengthTrain }}
 {{ lengthTest }}
 accuracy: {{ accuracyScore }}
+-->
+{% if accuracyScore < 0.5 %}
+    <h3> We do not have enough data on your preferences yet to give recommendations.  </h3>
+{% else %}
+<!-- Turns off the escape from the html so the html is properly rendered for viewing
+{% autoescape off %} {{ table }} {% endautoescape %} -->
 
-<!-- Turns off the escape from the html so the html is properly rendered for viewing -->
-{% autoescape off %} {{ table }} {% endautoescape %}
+{% for perfume, percent in perfumes %}
+<article class="media content-section">
+
+    <img class="rounded-circle article-img" src="{{ perfume.added_by.profile.image.url }}">
+    <div class="media-body">
+        <h4><a class="article-title" href="{% url 'perfume-detail' perfume.id %}">{{ perfume.name }} by
+            {{ perfume.house}} </a></h4>
+        <h5> Our confidence that you will like it: {{ percent }}%</h5>
+        <p class="article-content">Description: {{ perfume.description }}</p>
+        <div class="article-metadata">
+            Added by: <a class="mr-2" href="{% url 'user-perfumes' perfume.added_by.username %}"> {{ perfume.added_by }} </a>
+            <small class="text-muted"> on {{ perfume.added_date|date:"F d, Y" }}</small>
+        </div>
+    </div>
+
+</article>
+
+{% endfor %}
 
 
-<!-- SCRATCH -->
+{% endif %}
+
+
 {% endblock %}

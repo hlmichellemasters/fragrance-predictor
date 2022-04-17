@@ -23,7 +23,7 @@
 
     <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
         <div class="container">
-            <a class="navbar-brand mr-4" href="{% url 'user-recommendation-list' %}">Indie Fragrance Predictor</a>
+            <a class="navbar-brand mr-4" href="{% url 'predictor-home' %}">Indie Fragrance Predictor</a>
 
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
@@ -33,11 +33,9 @@
 
                 <div class="navbar-nav mr-auto">
 
-                    <a class="nav-item nav-link" href="{% url 'user-recommendation-list' %}"> Recommendations </a>
+
 
                     <a class="nav-item nav-link" href="{% url 'predictor-perfumes' %}"> Fragrances </a>
-
-                    <a class="nav-item nav-link" href="{% url 'user-preference-list' user.username %}"> Preferences </a>
 
                     <a class="nav-item nav-link" href="{% url 'predictor-about' %}">About</a>
                 </div>
@@ -45,7 +43,8 @@
                 <!-- Navbar Right Side -->
                 <div class="navbar-nav">
                     {% if user.is_authenticated %}
-
+                    <a class="nav-item nav-link" href="{% url 'user-recommendation-list' %}"> Recommendations </a>
+                        <a class="nav-item nav-link" href="{% url 'user-preference-list' user.username %}"> Preferences </a>
                         <a class="nav-item nav-link" href="{% url 'perfume-create' %}"> Add Perfume </a>
                         <a class="nav-item nav-link" href="{% url 'profile' %}">Profile</a>
                         <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>

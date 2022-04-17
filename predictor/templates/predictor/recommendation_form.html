@@ -1,0 +1,15 @@
+{% extends "predictor/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="content-section">
+
+    <form method="POST">
+        {% csrf_token %}
+
+        {{ form|crispy }}
+        <button type="submit" class=""btn btn-primary">Get Recommendations</button>
+    </form>
+
+</div>
+{% endblock content%}

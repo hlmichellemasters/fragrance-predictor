@@ -9,7 +9,8 @@
 
         <img class="rounded-circle article-img" src="{{ perfume.added_by.profile.image.url }}">
         <div class="media-body">
-            <h2><a class="article-title" href="{% url 'perfume-detail' perfume.id %}">{{ perfume.name }} by {{ perfume.house}}</a></h2>
+            <h2><a class="article-title" href="{% url 'perfume-detail' perfume.id %}">{{ perfume.name }} by
+                {{ perfume.house}}</a></h2>
             <p class="article-content">{{ perfume.description }}</p>
             <div class="article-metadata">
                 Added by: <a class="mr-2" href="{% url 'user-perfumes' perfume.added_by.username %}"> {{ perfume.added_by }} </a>
