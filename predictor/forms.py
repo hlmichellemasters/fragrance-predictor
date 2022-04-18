@@ -4,7 +4,8 @@ from itertools import groupby
 from django.forms.models import ModelChoiceIterator, ModelMultipleChoiceField
 
 
-# from https://blog.mounirmesselmeni.de/2013/11/25/django-grouped-select-field-for-modelchoicefield-or-modelmultiplechoicefield/
+# from https://blog.mounirmesselmeni.de/2013/11/25/
+# django-grouped-select-field-for-modelchoicefield-or-modelmultiplechoicefield/
 class GroupedMultipleModelChoiceField(ModelMultipleChoiceField):
 
     def __init__(self, group_by_field, group_label=None, *args, **kwargs):
@@ -39,7 +40,7 @@ class GroupedModelChoiceIterator(ModelChoiceIterator):
                     self.queryset.all(),
                     key=lambda row: getattr(
                         row, self.field.group_by_field)):
-                if group is not None: #Line added
+                if group is not None:
                     yield (
                         self.field.group_label(group),
                         [self.choice(ch) for ch in choices])

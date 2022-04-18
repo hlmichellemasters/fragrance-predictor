@@ -1,13 +1,18 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 import math
 from datetime import datetime
+
+import pandas as pd
+from pandas import DataFrame
+
 from users.models import Profile
 from .forms import ReviewForm, RecommendationForm
 from .models import Perfume, Preference
 from . import recommendations as rec
+from .recommendations import find_perfumes_from_features
 
 
 def about(request):
@@ -79,17 +84,59 @@ def user_recommendation_list(request):
 def recommendation_form(request):
     if request.POST:
         form = RecommendationForm(request.POST)
+        if form.is_valid():
+            notes_loves = form.cleaned_data['other_notes_loves']
+            notes_not_loves = form.cleaned_data['other_notes_not_loves']
+            perfume_loves = form.cleaned_data['perfume_loves']
+            perfume_not_loves = form.cleaned_data['perfume_not_loves']
+
+            if perfume_loves:
+                loves_df = pd.DataFrame([p.__dict__ for p in perfume_loves])
+            else:
+                loves_df = pd.DataFrame()
+            if perfume_not_loves:
+                not_loves_df = pd.DataFrame([p.__dict__ for p in perfume_not_loves])
+            else:
+                not_loves_df = pd.DataFrame()
+
+            perfumes = find_perfumes_from_features(notes_loves, notes_not_loves, loves_df, not_loves_df)
+
+            # table = DataFrame.to_html(not_loves_df)
+
+            return render(request, 'predictor/recommendation_list.html', {
+                                                                          # 'table': table,
+                                                                          'form': form,
+                                                                          'perfumes': perfumes,
+                                                                          'loves_df': loves_df,
+                                                                          'not_loves_df': not_loves_df,
+                                                                          'perfume_loves': perfume_loves,
+                                                                          'perfume_not_loves': perfume_not_loves,
+                                                                          'notes_loves': notes_loves,
+                                                                          'notes_not_loves': notes_not_loves})
+
     else:
         form = RecommendationForm()
 
-
-    # if form.is_valid():
-    #     review = form.save(commit=False)
-    #     review.perfume = perfume
-    #     review.user = request.user
-    #     review.modified_date = datetime.now()
-    #     review.save()
-    #     return HttpResponseRedirect(reverse('perfume-detail', args=(pk,)))
-
     return render(request, 'predictor/recommendation_form.html', {'form': form})
 
+
+def recommendation_list(request):
+    # perfume_loves = request.perfume_loves
+    # perfume_not_loves = request.perfume_not_loves
+    # notes_loves = request.other_notes_loves
+    # notes_not_loves = request.other_notes_not_loves
+    #
+    # loves_df = DataFrame.from_records(perfume_loves)
+    # not_loves_df = DataFrame.from_records(perfume_not_loves)
+    #
+    # perfumes = find_perfumes_from_features(notes_loves, notes_not_loves, loves_df, not_loves_df)
+    # table = DataFrame.to_html(perfumes)
+
+    return render(request, 'predictor/recommendation_list.html',
+                  # {'table': table,
+                  #                                                 'perfumes': perfumes,
+                  #                                                 'perfume_loves': perfume_loves,
+                  #                                                 'perfume_not_loves': perfume_not_loves,
+                  #                                                 'notes_loves': notes_loves,
+                  #                                                 'notes_not_loves': notes_not_loves}
+                  )

@@ -1,17 +1,31 @@
 {% extends 'predictor/perfume_list.html' %}
 
 {% block title %}
-<h2> Recommendations for {{ username }} </h2>
+<h2> Recommendations </h2>
 {% endblock %}
 
 
 {% block content %}
 
-{% if accuracyScore < 0.5 %}
-    <h3> We do not have enough data on your preferences yet to give recommendations.  </h3>
-{% else %}
+<h2> Based off your preferences of: </h2>
 
-<!-- {% autoescape off %} {{ table }} {% endautoescape %} -->
+Loves:<br>
+{% for perfume in perfume_loves %}
+    {{ perfume }},
+{% endfor %}
+<br> and <br>
+{{ notes_loves }}
+<br>
+Not Loves:<br>
+{% for perfume in perfume_not_loves %}
+    {{ perfume }}
+{% endfor %}
+<br> and <br>
+{{ notes_not_loves }}
+<br><br>
+
+<h2> We think you might like:</h2>
+
 
 {% for perfume, percent in perfumes %}
 <article class="media content-section">
@@ -31,9 +45,5 @@
 </article>
 
 {% endfor %}
-
-
-{% endif %}
-
 
 {% endblock %}

@@ -13,6 +13,8 @@ from . import views, recommendation_views
 
 urlpatterns = [
     path('', recommendation_views.recommendation_form, name='predictor-home'),
+    path('recommendation_list/', recommendation_views.recommendation_list, name='recommendation-list'),
+
     path('perfumes', PerfumeListView.as_view(), name='predictor-perfumes'),
     path('perfume/<int:pk>/', views.perfume_detail, name='perfume-detail'),
 
@@ -28,7 +30,7 @@ urlpatterns = [
     path('perfume/<int:pk>/add_review/', recommendation_views.add_preference, name='add-review'),
 
     # provides the view for recommended perfumes
-    path('recommendation/', recommendation_views.user_recommendation_list, name='user-recommendation-list'),
+    path('user/recommendation/', recommendation_views.user_recommendation_list, name='user-recommendation-list'),
 
     # path('perfume/<int:pk>/', views.preference_detail(), name='preference_detail'),
 
