@@ -8,8 +8,7 @@ from .views import (
     UserPerfumeListView,
     UserPreferenceListView,
 )
-from . import views, recommendation_views
-
+from . import views, recommendation_views, chart_views
 
 urlpatterns = [
     path('', recommendation_views.recommendation_form, name='predictor-home'),
@@ -34,6 +33,6 @@ urlpatterns = [
 
     # path('perfume/<int:pk>/', views.preference_detail(), name='preference_detail'),
 
-    path('about/', recommendation_views.about, name='predictor-about'),
+    path('about/', chart_views.Dashboard.as_view(), name='predictor-about'),
 ]
 

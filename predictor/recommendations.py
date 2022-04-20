@@ -17,12 +17,9 @@ import pandas as pd
 import re
 
 
-def build_model_for_user(user, reviews_df):
-    perfumes_df = pd.DataFrame.from_records(Perfume.objects.all().values('id', 'name', 'house', 'description'))
-    perfumes_df = add_features_to_perfume_dataframe(perfumes_df)
+def build_model_for_user(reviews_df):
 
-    # inner join the perfume and review data to include all important columns for reviewed perfumes
-    perfume_reviews_df = pd.merge(reviews_df, perfumes_df, how='inner', left_on='perfume_id', right_on='id')
+    perfume_df, perfume_reviews_df = get_perfumes_and_reviews_df(reviews_df)
 
     # split the data for training and testing
     train_data, test_data, train_labels, test_labels = \
@@ -41,7 +38,7 @@ def build_model_for_user(user, reviews_df):
 
     accuracy = accuracy_score(test_labels, predictions)
 
-    return classifier, accuracy, perfumes_df, perfume_reviews_df, counter
+    return classifier, accuracy, perfume_df, perfume_reviews_df, counter
 
 
 # create similarity score tuples [(perfume_id, similarity_score), (.,.), ...]
@@ -124,6 +121,18 @@ def add_features_to_perfume_dataframe(dataframe):
     dataframe['features'] = features
 
     return dataframe
+
+
+def get_perfumes_and_reviews_df(reviews_df):
+    perfumes_df = pd.DataFrame.from_records(Perfume.objects.all().values('id', 'name', 'house', 'description'))
+    perfumes_df = add_features_to_perfume_dataframe(perfumes_df)
+    users_df = pd.DataFrame.from_records(User.objects.all().values('id', 'username'))
+
+    # inner join the perfume and review data to include all important columns for reviewed perfumes
+    perfume_reviews_df = pd.merge(reviews_df, perfumes_df, how='inner', left_on='perfume_id', right_on='id')
+    perfume_reviews_df = pd.merge(perfume_reviews_df, users_df, how='inner', left_on='user_id', right_on='id')
+
+    return perfumes_df, perfume_reviews_df
 
 
 def split_and_vectorize_data(data, labels):

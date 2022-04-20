@@ -6,17 +6,12 @@ import math
 from datetime import datetime
 
 import pandas as pd
-from pandas import DataFrame
 
 from users.models import Profile
 from .forms import ReviewForm, RecommendationForm
 from .models import Perfume, Preference
 from . import recommendations as rec
 from .recommendations import find_perfumes_from_features
-
-
-def about(request):
-    return render(request, 'predictor/about.html', {'title': 'about'})
 
 
 @login_required()
@@ -46,13 +41,13 @@ def user_recommendation_list(request):
 
     # gets the profile and reviews of the user
     profile = Profile.objects.filter(user=user).first()
-    reviews_df = profile.preference_dataframe()
-    if len(reviews_df) < 1:
+    user_reviews_df = profile.preference_dataframe()
+    if len(user_reviews_df) < 1:
         return render(request, 'predictor/user_recommendation_list.html', {'username': request.user.username,
                                                                            'accuracyScore': 0})
 
     # build the model for the user
-    classifier, accuracy, perfumes_df, perfume_reviews_df, counter = rec.build_model_for_user(user, reviews_df)
+    classifier, accuracy, perfumes_df, perfume_reviews_df, counter = rec.build_model_for_user(user_reviews_df)
 
     # extract all perfumes that user hasn't reviewed yet into its own dataframe
     unreviewed_perfumes_df = perfumes_df[~perfumes_df.id.isin(perfume_reviews_df.perfume_id)]

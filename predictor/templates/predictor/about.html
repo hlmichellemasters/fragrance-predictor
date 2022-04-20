@@ -1,5 +1,24 @@
 {% extends "predictor/base.html" %}
 
+{{ table }}
+
 {% block content %}
-<h1> About the Predictor </h1>
-{% endblock content%}
+<div class="container">
+
+            {% for chart in charts %}
+
+                            {{ chart.html|safe }}
+
+            {% endfor %}
+
+</div>
+
+{% endblock %}
+
+{% block js_scripts %}
+    {% for chart in charts %}
+        {{ chart.js|safe }}
+    {% endfor %}
+{% endblock %}
+
+

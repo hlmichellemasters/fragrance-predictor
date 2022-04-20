@@ -35,7 +35,7 @@ class Preference(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     perfume = models.ForeignKey(Perfume, on_delete=models.CASCADE)
     love = models.BooleanField()
-    comment = models.CharField(max_length=200)
+    comment = models.CharField(max_length=200, null=True)
     review_date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
