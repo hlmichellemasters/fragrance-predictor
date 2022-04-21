@@ -1,14 +1,14 @@
 {% extends "predictor/base.html" %}
 
-{{ table }}
+
 
 {% block content %}
 <div class="container">
 
+     {% autoescape off %} {{ table }} {% endautoescape %}
+
             {% for chart in charts %}
-
                             {{ chart.html|safe }}
-
             {% endfor %}
 
 </div>

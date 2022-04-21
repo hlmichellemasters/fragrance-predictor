@@ -136,7 +136,7 @@ class Chart:
 
         self.labels = labels
 
-    def from_df(self, df, values, labels, stacks=None, aggfunc=np.sum, round_values=0, fill_value=0):
+    def from_df(self, df, values, labels, stacks=None, aggfunc=np.mean, round_values=2, fill_value=0):
         """
         function to build a chart from a dataframe
         ``df`` is the datframe to use
