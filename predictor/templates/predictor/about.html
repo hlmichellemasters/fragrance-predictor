@@ -8,6 +8,8 @@
      {% autoescape off %} {{ table }} {% endautoescape %}
 
             {% for chart in charts %}
+                            {{ chart.x_label }}
+                            {{ chart.y_label }}
                             {{ chart.html|safe }}
             {% endfor %}
 

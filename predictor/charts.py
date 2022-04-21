@@ -97,13 +97,16 @@ class Chart:
     are listed
     """
     chart_type: str
+    x_label: str = field(default="")
+    y_label: str = field(default="")
+    title: str = field(default="")
     datasets: List = field(default_factory=list)
     labels: List = field(default_factory=list)
     chart_id: str = field(default_factory=generate_chart_id)
     palette: List = field(default_factory=get_colors)
     options: dict = field(default_factory=get_options)
 
-    def from_lists(self, values, labels, stacks):
+    def from_lists(self, values, labels, stacks, x_label, y_label, title):
         """
         function to build a chart from lists
         ``values`` is a list of datasets. If the chart is not stacked
@@ -135,8 +138,12 @@ class Chart:
             self.datasets[0]['backgroundColor'] = self.palette
 
         self.labels = labels
+        self.y_label = y_label
+        self.x_label = x_label
+        self.title = title
 
-    def from_df(self, df, values, labels, stacks=None, aggfunc=np.mean, round_values=2, fill_value=0):
+    def from_df(self, df, x_label, y_label, title, values, labels, stacks=None, aggfunc=np.mean,
+                decimal_places=3):
         """
         function to build a chart from a dataframe
         ``df`` is the datframe to use
@@ -157,13 +164,13 @@ class Chart:
             fill_value=0
         )
 
-        pivot = pivot.round(round_values)
+        pivot = pivot.round(decimal_places)
 
         values = pivot.values.tolist()
         labels = pivot.columns.tolist()
         stacks = pivot.index.tolist()
 
-        self.from_lists(values, labels, stacks)
+        self.from_lists(values, labels, stacks, x_label, y_label, title)
 
     def get_elements(self):
         """
@@ -191,11 +198,23 @@ class Chart:
 
         if self.chart_type == 'bar':
             elements['type'] = 'bar'
+            self.options['legend'] = {
+                                         'display': 'false'
+                                     }
+            self.options['title'] = {
+                                        'display': 'true',
+                                        'text': self.title,
+                                    }
             self.options['scales'] = {
                 'xAxes': [
                     {
                         'ticks': {
                             'beginAtZero': 'true'
+                        },
+                        # x-label is not showing up
+                        'scaleLabel:': {
+                            'display': 'true',
+                            'labelString': self.x_label
                         }
                     }
                 ],
@@ -203,6 +222,11 @@ class Chart:
                     {
                         'ticks': {
                             'beginAtZero': 'true'
+                        },
+                        # neither is y-label showing up
+                        'scaleLabel:': {
+                            'display': 'true',
+                            'labelString': self.y_label
                         }
                     }
                 ]
@@ -210,6 +234,15 @@ class Chart:
 
         if self.chart_type == 'groupedBar':
             elements['type'] = 'bar'
+            # options: {
+            #     legend: {display: false},
+            #     title: {
+            #         display: true,
+            #         text: "World Wine Production 2018"
+            #     }
+            self.options['legend'] = {
+                'display': 'false'
+            }
             self.options['scales'] = {
                 'xAxes': [
                     {
@@ -226,9 +259,17 @@ class Chart:
                     }
                 ]
             }
+            self.options['title'] = {
+                'display': 'true',
+                'text': self.title
+            }
 
         if self.chart_type == 'horizontalBar':
             elements['type'] = 'horizontalBar'
+            self.options['title'] = {
+                'display': 'true',
+                'text': self.title
+            }
             self.options['scales'] = {
                 'xAxes': [
                     {
@@ -248,6 +289,10 @@ class Chart:
 
         if self.chart_type == 'stackedHorizontalBar':
             elements['type'] = 'horizontalBar'
+            self.options['title'] = {
+                'display': 'true',
+                'text': self.title
+            }
             self.options['scales'] = {
                 'xAxes': [
                     {'stacked': 'true'}
@@ -281,7 +326,7 @@ class Chart:
 
     def get_presentation(self):
         code = {
-            'html':self.get_html(),
+            'html': self.get_html(),
             'js': self.get_js(),
         }
         return code
