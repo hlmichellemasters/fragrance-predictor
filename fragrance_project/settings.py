@@ -36,7 +36,6 @@ INSTALLED_APPS = [
     'predictor.apps.PredictorConfig',
     'users.apps.UsersConfig',
     'crispy_forms',
-    'django_crontab',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

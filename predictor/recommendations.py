@@ -1,18 +1,9 @@
-from pandas import DataFrame
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA, TruncatedSVD, IncrementalPCA
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import MultinomialNB
-from sklearn.preprocessing import StandardScaler
 from sklearn.feature_extraction.text import TfidfTransformer, CountVectorizer
-from sklearn import datasets, linear_model
 from .models import Preference, User, Perfume
-import seaborn as sb
-import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
 import re
 
@@ -77,7 +68,7 @@ def find_perfumes_from_features(loves_notes, not_loves_notes, loves_df, not_love
 
     # pull all the perfumes from database and add the features column
     all_perfumes_df = pd.DataFrame.from_records(Perfume.objects.all().values('id', 'name', 'house', 'description'))
-
+    # add the features of the perfumes as a new column and set the index to be the perfume 'id'
     all_perfumes_df = add_features_to_perfume_dataframe(all_perfumes_df).set_index('id')
 
     # subtract all the perfumes that user has already mentioned (loved and not loved)
@@ -91,10 +82,9 @@ def find_perfumes_from_features(loves_notes, not_loves_notes, loves_df, not_love
         feature = feature.strip(",")
         found_perfumes_df = pd.concat([found_perfumes_df,
                                        unreviewed_df[unreviewed_df['features'].str.contains(feature, case=False,
-                                                                                            regex=False)]],
-                                      ignore_index=True)
-        unreviewed_df = unreviewed_df[~unreviewed_df['features'].str.contains(feature, case=False, regex=False)]
-
+                                                                                            regex=False)]])
+        # unreviewed_df = unreviewed_df[~unreviewed_df['features'].str.contains(feature, case=False, regex=False)]
+    unreviewed_df = unreviewed_df[~unreviewed_df.index.isin(found_perfumes_df.index)]
     # features_lower = unreviewed_df['features'].str.lower()
     # unreviewed_df = unreviewed_df[~features_lower.str.contains("honey", case=False, regex=False)]
 
@@ -108,7 +98,6 @@ def find_perfumes_from_features(loves_notes, not_loves_notes, loves_df, not_love
     recommended_perfumes = []
 
     for row in sorted_scores:
-        # recommended_perfume = unreviewed_df[unreviewed_df.id == row[0]]['name'].values[0]
         perfume_id = row[0]
         recommended_perfume = Perfume.objects.filter(id=perfume_id).first()
         similarity_percent = row[1] * 100
@@ -177,90 +166,90 @@ def fit_multi_NB(train_counts, test_counts, train_labels, test_labels):
     return accuracy_score(test_labels, predictions)
 
 
-def random_forest(train_counts, test_counts, train_labels, test_labels):
-    forest = RandomForestClassifier()
-    forest.fit(train_counts, train_labels)
-
-    predictions = forest.predict(test_counts)
-
-    print("Accuracy score for random forest: {0:.2f}".format(accuracy_score(test_labels, predictions)))
-
-
-def scale(train_counts, test_counts):
-    # Standardize the features
-    train_counts = StandardScaler(with_mean=False).fit_transform(train_counts)
-    test_counts = StandardScaler(with_mean=False).fit_transform(test_counts)
-
-    return train_counts, test_counts
-
-
-def cluster(counts, train_counts):
-    NUMBER_OF_CLUSTERS = 2
-
-    km = KMeans(
-        n_clusters=NUMBER_OF_CLUSTERS,
-        init='k-means++',
-        max_iter=500)
-    km.fit(train_counts)
-
-    # First: for every document we get its corresponding cluster
-    clusters = km.predict(counts)
-
-    return clusters, km
-
-
-def reduce(counts):
-    pca = IncrementalPCA(n_components=2)
-    two_dim = pca.fit_transform(counts.todense())
-    print("Explained variance with PCA: " + str(pca.explained_variance_))
-
-    scatter_x = two_dim[:, 0]  # first principle component
-    scatter_y = two_dim[:, 1]  # second principle component
-
-    return scatter_x, scatter_y
-
-
-def truncate(counts):
-    svd = TruncatedSVD(n_components=2, random_state=13)
-
-    data = svd.fit_transform(counts)
-
-    pca = IncrementalPCA(n_components=2)
-    two_dim = pca.fit_transform(counts.todense())
-    print("Explained variance with Truncated SVD: " + str(svd.explained_variance_))
-
-    scatter_x = two_dim[:, 0]  # first principle component
-    scatter_y = two_dim[:, 1]  # second principle component
-
-    return scatter_x, scatter_y
-
-
-def peek_at_clusters(count_vectorizer, km):
-    order_centroids = km.cluster_centers_.argsort()[:, ::-1]
-
-    terms = count_vectorizer.get_feature_names_out()
-    stop_words = count_vectorizer.stop_words_
-    #    for word in stop_words:
-    #       print(stop_words)
-    print(stop_words)
-    for i in range(2):
-        print("Cluster %d:" % i, end='')
-        for ind in order_centroids[i, :10]:
-            print(' %s' % terms[ind], end='')
-        print()
-
-
-def linear_regression(x, y):
-    # Create linear regression object
-    regr = linear_model.LinearRegression()
-
-    x = np.asarray(x).reshape(-1, 1)
-    y = np.asarray(y).reshape(-1, 1)
-
-    # Train the model using the training sets
-    regr.fit(x, y)
-
-    # Make predictions using the testing set
-    y_pred = regr.predict(x)
-
-    return y_pred
+# def random_forest(train_counts, test_counts, train_labels, test_labels):
+#     forest = RandomForestClassifier()
+#     forest.fit(train_counts, train_labels)
+#
+#     predictions = forest.predict(test_counts)
+#
+#     print("Accuracy score for random forest: {0:.2f}".format(accuracy_score(test_labels, predictions)))
+#
+#
+# def scale(train_counts, test_counts):
+#     # Standardize the features
+#     train_counts = StandardScaler(with_mean=False).fit_transform(train_counts)
+#     test_counts = StandardScaler(with_mean=False).fit_transform(test_counts)
+#
+#     return train_counts, test_counts
+#
+#
+# def cluster(counts, train_counts):
+#     NUMBER_OF_CLUSTERS = 2
+#
+#     km = KMeans(
+#         n_clusters=NUMBER_OF_CLUSTERS,
+#         init='k-means++',
+#         max_iter=500)
+#     km.fit(train_counts)
+#
+#     # First: for every document we get its corresponding cluster
+#     clusters = km.predict(counts)
+#
+#     return clusters, km
+#
+#
+# def reduce(counts):
+#     pca = IncrementalPCA(n_components=2)
+#     two_dim = pca.fit_transform(counts.todense())
+#     print("Explained variance with PCA: " + str(pca.explained_variance_))
+#
+#     scatter_x = two_dim[:, 0]  # first principle component
+#     scatter_y = two_dim[:, 1]  # second principle component
+#
+#     return scatter_x, scatter_y
+#
+#
+# def truncate(counts):
+#     svd = TruncatedSVD(n_components=2, random_state=13)
+#
+#     data = svd.fit_transform(counts)
+#
+#     pca = IncrementalPCA(n_components=2)
+#     two_dim = pca.fit_transform(counts.todense())
+#     print("Explained variance with Truncated SVD: " + str(svd.explained_variance_))
+#
+#     scatter_x = two_dim[:, 0]  # first principle component
+#     scatter_y = two_dim[:, 1]  # second principle component
+#
+#     return scatter_x, scatter_y
+#
+#
+# def peek_at_clusters(count_vectorizer, km):
+#     order_centroids = km.cluster_centers_.argsort()[:, ::-1]
+#
+#     terms = count_vectorizer.get_feature_names_out()
+#     stop_words = count_vectorizer.stop_words_
+#     #    for word in stop_words:
+#     #       print(stop_words)
+#     print(stop_words)
+#     for i in range(2):
+#         print("Cluster %d:" % i, end='')
+#         for ind in order_centroids[i, :10]:
+#             print(' %s' % terms[ind], end='')
+#         print()
+#
+#
+# def linear_regression(x, y):
+#     # Create linear regression object
+#     regr = linear_model.LinearRegression()
+#
+#     x = np.asarray(x).reshape(-1, 1)
+#     y = np.asarray(y).reshape(-1, 1)
+#
+#     # Train the model using the training sets
+#     regr.fit(x, y)
+#
+#     # Make predictions using the testing set
+#     y_pred = regr.predict(x)
+#
+#     return y_pred
