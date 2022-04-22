@@ -10,18 +10,28 @@
 <h2> Based off your preferences of: </h2>
 
 Loves:<br>
+
 {% for perfume in perfume_loves %}
     {{ perfume }},
+
 {% endfor %}
 <br> and <br>
+
 {{ notes_loves }}
 <br>
+
 Not Loves:<br>
+
 {% for perfume in perfume_not_loves %}
     {{ perfume }}
 {% endfor %}
 <br> and <br>
+
 {{ notes_not_loves }}
+
+{% for note in not_loves_list %}
+    {{ note }}
+{% endfor %}
 <br><br>
 
 <h2> We think you might like:</h2>

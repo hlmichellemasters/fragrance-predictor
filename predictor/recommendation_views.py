@@ -88,14 +88,16 @@ def recommendation_form(request):
             if perfume_loves:
                 loves_df = pd.DataFrame([p.__dict__ for p in perfume_loves])
             else:
-                loves_df = pd.DataFrame()
+                loves_df = pd.DataFrame(columns=['id'])
+
             if perfume_not_loves:
                 not_loves_df = pd.DataFrame([p.__dict__ for p in perfume_not_loves])
             else:
-                not_loves_df = pd.DataFrame()
+                not_loves_df = pd.DataFrame(columns=['id'])
 
             perfumes = find_perfumes_from_features(notes_loves, notes_not_loves, loves_df, not_loves_df)
 
+            not_loves_list = notes_not_loves.split()
             # table = DataFrame.to_html(not_loves_df)
 
             return render(request, 'predictor/recommendation_list.html', {
@@ -107,7 +109,8 @@ def recommendation_form(request):
                                                                           'perfume_loves': perfume_loves,
                                                                           'perfume_not_loves': perfume_not_loves,
                                                                           'notes_loves': notes_loves,
-                                                                          'notes_not_loves': notes_not_loves})
+                                                                          'notes_not_loves': notes_not_loves,
+                                                                          'not_loves_list': not_loves_list})
 
     else:
         form = RecommendationForm()
@@ -116,22 +119,4 @@ def recommendation_form(request):
 
 
 def recommendation_list(request):
-    # perfume_loves = request.perfume_loves
-    # perfume_not_loves = request.perfume_not_loves
-    # notes_loves = request.other_notes_loves
-    # notes_not_loves = request.other_notes_not_loves
-    #
-    # loves_df = DataFrame.from_records(perfume_loves)
-    # not_loves_df = DataFrame.from_records(perfume_not_loves)
-    #
-    # perfumes = find_perfumes_from_features(notes_loves, notes_not_loves, loves_df, not_loves_df)
-    # table = DataFrame.to_html(perfumes)
-
-    return render(request, 'predictor/recommendation_list.html',
-                  # {'table': table,
-                  #                                                 'perfumes': perfumes,
-                  #                                                 'perfume_loves': perfume_loves,
-                  #                                                 'perfume_not_loves': perfume_not_loves,
-                  #                                                 'notes_loves': notes_loves,
-                  #                                                 'notes_not_loves': notes_not_loves}
-                  )
+    return render(request, 'predictor/recommendation_list.html')

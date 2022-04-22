@@ -18,7 +18,6 @@ import re
 
 
 def build_model_for_user(reviews_df):
-
     perfume_df, perfume_reviews_df = get_perfumes_and_reviews_df(reviews_df)
 
     # split the data for training and testing
@@ -68,7 +67,7 @@ def find_perfumes_from_features(loves_notes, not_loves_notes, loves_df, not_love
     for word in loves_notes:
         love_features += word
 
-    custom_loves_data = {'id': [0],
+    custom_loves_data = {
                          'name': [' '],
                          'house': [' '],
                          'description': [' '],
@@ -78,23 +77,31 @@ def find_perfumes_from_features(loves_notes, not_loves_notes, loves_df, not_love
 
     # pull all the perfumes from database and add the features column
     all_perfumes_df = pd.DataFrame.from_records(Perfume.objects.all().values('id', 'name', 'house', 'description'))
-    all_perfumes_df = add_features_to_perfume_dataframe(all_perfumes_df)
+
+    all_perfumes_df = add_features_to_perfume_dataframe(all_perfumes_df).set_index('id')
 
     # subtract all the perfumes that user has already mentioned (loved and not loved)
-    unreviewed_df = all_perfumes_df[~all_perfumes_df.id.isin([custom_loves_df.id, not_loves_df.id])]
-    # unreviewed_df = unreviewed_df[~unreviewed_df.id.isin([not_loves_df.id, custom_loves_df.id])]
+    unreviewed_df = all_perfumes_df[~all_perfumes_df.index.isin([loves_df.id, not_loves_df.id])]
 
-    # subtract all the features that the user input they do not love
-    not_loves_list = re.findall(r'\s|,|[^,\s]+', not_loves_notes)
+    # subtract all perfumes with features the user input they do not love
+    not_loves_list = not_loves_notes.split()
+    found_perfumes_df = pd.DataFrame()
+
     for feature in not_loves_list:
-        unreviewed_df = unreviewed_df[~unreviewed_df['features'].str.contains(feature)]
+        feature = feature.strip(",")
+        found_perfumes_df = pd.concat([found_perfumes_df,
+                                       unreviewed_df[unreviewed_df['features'].str.contains(feature, case=False,
+                                                                                            regex=False)]],
+                                      ignore_index=True)
+        unreviewed_df = unreviewed_df[~unreviewed_df['features'].str.contains(feature, case=False, regex=False)]
 
-    unreviewed_df = custom_loves_df.append(unreviewed_df)
+    # features_lower = unreviewed_df['features'].str.lower()
+    # unreviewed_df = unreviewed_df[~features_lower.str.contains("honey", case=False, regex=False)]
+
+    # unreviewed_df.query('features.str.contains(feature)', engine='python')
+    unreviewed_df = pd.concat([custom_loves_df, unreviewed_df])
 
     sorted_scores = create_similarity_matrix(0, unreviewed_df)
-
-    print('Recommended perfumes based off of your inputs of loves: \'', loves_df, '\' are:\n')
-    print('and your inputs of not loves: \'', not_loves_df, '\' and \'', not_loves_notes, '\' are:\n')
 
     # loop through the returned sorted_scores matrix (up to 20?) and then add the formatted score
     scores = []
@@ -102,12 +109,15 @@ def find_perfumes_from_features(loves_notes, not_loves_notes, loves_df, not_love
 
     for row in sorted_scores:
         # recommended_perfume = unreviewed_df[unreviewed_df.id == row[0]]['name'].values[0]
-        recommended_perfume = Perfume.objects.get(id=row[0])
+        perfume_id = row[0]
+        recommended_perfume = Perfume.objects.filter(id=perfume_id).first()
         similarity_percent = row[1] * 100
         scores.append("{:.2f}".format(similarity_percent))
         recommended_perfumes.append(recommended_perfume)
 
     perfumes = zip(recommended_perfumes, scores)
+
+    # print(unreviewed_df.dtypes())
 
     return perfumes
 
@@ -223,35 +233,6 @@ def truncate(counts):
     scatter_y = two_dim[:, 1]  # second principle component
 
     return scatter_x, scatter_y
-
-
-# Plot it
-def plot_PCA(clusters, scatter_x, scatter_y):
-    fig = plt.figure(figsize=(12, 10))
-    ax = fig.add_subplot(1, 1, 1)
-    ax.set_xlabel('First Principal Component ', fontsize=15)
-    ax.set_ylabel('Second Principal Component ', fontsize=15)
-    ax.set_title('Principal Component Analysis (2PCs)', fontsize=20)
-
-    cmap = {0: 'red', 1: 'blue', 2: 'black', 3: 'green'}
-
-    for group in np.unique(clusters):
-        i = np.where(clusters == group)
-        ax.scatter(scatter_x[i],
-                   scatter_y[i],
-                   c=cmap[group],
-                   label=group)
-    ax.legend()
-    ax.grid()
-    plt.show()
-
-
-def plot_num_love(user_data):
-    plt.figure(figsize=(5, 5))
-    ax = sb.countplot(x=user_data['Love'], data=user_data, order=user_data['Love'].value_counts().index)
-    for p, label in zip(ax.patches, user_data['Love'].value_counts()):
-        ax.annotate(label, (p.get_x() + 0.25, p.get_height() + 0.5))
-    plt.show()
 
 
 def peek_at_clusters(count_vectorizer, km):
