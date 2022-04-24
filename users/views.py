@@ -46,21 +46,3 @@ def profile(request):
         'pu_form': pu_form
     }
     return render(request, 'users/profile.html', context)
-
-
-
-
-# @login_required
-# def preference_update_view(request):
-#     PreferenceFormSet = inlineformset_factory(Preference, Perfume, fields=('perfume', 'love'), extra=10)
-#     user = request.user
-#     formset = PreferenceFormSet(queryset=Perfume.objects.all(), instance=user)
-#
-#     if request.method == 'POST':
-#         formset = PreferenceFormSet(request.POST, instance=user)
-#         if formset.is_valid():
-#             formset.save()
-#             return redirect('/')
-#
-#     context = {'formset': formset}
-#     return render(request, 'users/user_perfumes_list.html', context)

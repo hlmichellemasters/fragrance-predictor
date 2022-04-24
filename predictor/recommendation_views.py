@@ -4,12 +4,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 import math
 from datetime import datetime
-
 import pandas as pd
-
 from users.models import Profile
 from .forms import ReviewForm, RecommendationForm
-from .models import Perfume, Preference
+from .models import Perfume
 from . import recommendations as rec
 from .recommendations import find_perfumes_from_features
 

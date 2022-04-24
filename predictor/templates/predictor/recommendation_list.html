@@ -7,34 +7,30 @@
 
 {% block content %}
 
-<h2> Based off your preferences of: </h2>
-
-Loves:<br>
-
-{% for perfume in perfume_loves %}
-    {{ perfume }},
-
-{% endfor %}
-<br> and <br>
-
-{{ notes_loves }}
+<h3> Based off your preferences for: </h3>
 <br>
+{% for perfume in perfume_loves %}
+    {{ perfume }}<br><br>
+{% endfor %}
 
-Not Loves:<br>
+{% if notes_loves %}
+    and <br> <br>
+    {{ notes_loves }}
+{% endif %}
 
+<br> <h3> And based off you not loving: </h3>
+
+<br>
 {% for perfume in perfume_not_loves %}
-    {{ perfume }}
+    {{ perfume }}<br><br>
 {% endfor %}
-<br> and <br>
 
-{{ notes_not_loves }}
+{% if notes_not_loves %}
+    and <br> <br>
+    {{ notes_not_loves }}
+{% endif %}
 
-{% for note in not_loves_list %}
-    {{ note }}
-{% endfor %}
-<br><br>
-
-<h2> We think you might like:</h2>
+<br><br> <h2> We think you might like:</h2> <br>
 
 
 {% for perfume, percent in perfumes %}

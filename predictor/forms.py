@@ -62,7 +62,7 @@ class RecommendationForm(forms.Form):
                                                     group_by_field='house',
                                                     help_text="hold cmd/ctrl to select multiple",
                                                     queryset=Perfume.objects.all().order_by('house', 'name'))
-    perfume_loves.widget.attrs.update(size='15')
+    perfume_loves.widget.attrs.update(size='10')
 
     other_notes_loves = forms.CharField(required=False, label="Notes you love:")
 
@@ -70,7 +70,7 @@ class RecommendationForm(forms.Form):
                                                         group_by_field='house',
                                                         help_text="hold cmd/ctrl to select multiple",
                                                         queryset=Perfume.objects.all().order_by('house', 'name'))
-    perfume_not_loves.widget.attrs.update(size='15')
+    perfume_not_loves.widget.attrs.update(size='10')
 
     other_notes_not_loves = forms.CharField(required=False, label="Notes you don't love:")
 

@@ -8,6 +8,7 @@ import pandas as pd
 import re
 
 
+# builds the Naive Bayes classifier for a user (based off the reviews passed to it)
 def build_model_for_user(reviews_df):
     perfume_df, perfume_reviews_df = get_perfumes_and_reviews_df(reviews_df)
 
@@ -15,17 +16,21 @@ def build_model_for_user(reviews_df):
     train_data, test_data, train_labels, test_labels = \
         train_test_split(perfume_reviews_df['features'].values.astype('U'), perfume_reviews_df['love'],
                          test_size=0.2, random_state=1)
-
+    # create the vectorizer
     counter = CountVectorizer(stop_words='english')
+    # fit it with the training data
     counter.fit(train_data)
+    # transform the training and test data with the vectorizer
     train_counts = counter.transform(train_data)
     test_counts = counter.transform(test_data)
 
+    # instantiate the Multinomial Naive Bayes classifier and train it with the vectorized training counts and labels
     classifier = MultinomialNB()
     classifier.fit(train_counts, train_labels)
 
+    # make predictions based off the vectorized test counts
     predictions = classifier.predict(test_counts)
-
+    # record the accuracy score for the test predictions based off the labels
     accuracy = accuracy_score(test_labels, predictions)
 
     return classifier, accuracy, perfume_df, perfume_reviews_df, counter
@@ -38,9 +43,9 @@ def create_similarity_matrix(perfume_id, perfume_data):
 
     # create the cosine similarity matrix from the features
     cs = cosine_similarity(vectorizer)
-
+    # index a list from the perfume_ID and the cosine similarity scores
     scores = list(enumerate(cs[perfume_id]))
-
+    # sort the scores from highest to lowest based off the score (2nd index)
     sorted_scores = sorted(scores, key=lambda x: x[1], reverse=True)
 
     # first one is itself (so 0 is excluded)
@@ -51,13 +56,14 @@ def create_similarity_matrix(perfume_id, perfume_data):
 def find_perfumes_from_features(loves_notes, not_loves_notes, loves_df, not_loves_df):
     # create a loves dataframe to use to create the similarity matrix with rest of perfumes
     love_features = ""
+    # loop through every inputted loved perfume and add the features into a loved features string
     for i in range(0, loves_df.shape[0]):
         new_feature = ' ' + loves_df['name'][i] + ' ' + loves_df['house'][i] + ' ' + loves_df['description'][i]
         love_features += new_feature
-
+    # append the inputted perfume notes they love (if was passed any)
     for word in loves_notes:
         love_features += word
-
+    # create the custom dataframe to hold the compiled loved features
     custom_loves_data = {
                          'name': [' '],
                          'house': [' '],
@@ -77,36 +83,32 @@ def find_perfumes_from_features(loves_notes, not_loves_notes, loves_df, not_love
     # subtract all perfumes with features the user input they do not love
     not_loves_list = not_loves_notes.split()
     found_perfumes_df = pd.DataFrame()
-
+    # finds all perfumes that have a match in their features with the notes the user specified they don't love
     for feature in not_loves_list:
         feature = feature.strip(",")
         found_perfumes_df = pd.concat([found_perfumes_df,
                                        unreviewed_df[unreviewed_df['features'].str.contains(feature, case=False,
                                                                                             regex=False)]])
-        # unreviewed_df = unreviewed_df[~unreviewed_df['features'].str.contains(feature, case=False, regex=False)]
+    # subtracts any found perfumes (with the not loved notes) from the unreviewed perfumes data
     unreviewed_df = unreviewed_df[~unreviewed_df.index.isin(found_perfumes_df.index)]
-    # features_lower = unreviewed_df['features'].str.lower()
-    # unreviewed_df = unreviewed_df[~features_lower.str.contains("honey", case=False, regex=False)]
-
-    # unreviewed_df.query('features.str.contains(feature)', engine='python')
+    # appends the custom loves dataframe with the unreviewed data
     unreviewed_df = pd.concat([custom_loves_df, unreviewed_df])
-
+    # creates the cosine similarity matrix out of the dataframe (using the 0th row as the comparison)
     sorted_scores = create_similarity_matrix(0, unreviewed_df)
 
-    # loop through the returned sorted_scores matrix (up to 20?) and then add the formatted score
+    # loop through the returned sorted_scores matrix and then add the formatted score
     scores = []
     recommended_perfumes = []
-
     for row in sorted_scores:
         perfume_id = row[0]
         recommended_perfume = Perfume.objects.filter(id=perfume_id).first()
         similarity_percent = row[1] * 100
         scores.append("{:.2f}".format(similarity_percent))
         recommended_perfumes.append(recommended_perfume)
-
+    # combine the recommended perfume with the score and return
     perfumes = zip(recommended_perfumes, scores)
 
-    # print(unreviewed_df.dtypes())
+    # print(unreviewed_df.dtypes()) (this was used for breaking and debugging this function within the browser)
 
     return perfumes
 
@@ -134,36 +136,35 @@ def get_perfumes_and_reviews_df(reviews_df):
     return perfumes_df, perfume_reviews_df
 
 
-def split_and_vectorize_data(data, labels):
-    train_data, test_data, train_labels, test_labels = train_test_split(data.values.astype('U'), labels, test_size=0.2,
-                                                                        random_state=1)
-
-    count_vectorizer = CountVectorizer(stop_words='english')
-    count_vectorizer.fit(data.values.astype('U'))
-    train_counts = count_vectorizer.transform(train_data)
-    test_counts = count_vectorizer.transform(test_data)
-
-    print("Num Train Data: " + str(len(train_data)))
-    print("Num Test Data: " + str(len(test_data)))
-
-    return count_vectorizer, train_counts, test_counts, train_labels, test_labels
-
-
 def frequency_transform(counts):
     tfidf_transformer = TfidfTransformer()
     transformed_counts = tfidf_transformer.fit_transform(counts)
     return transformed_counts
 
+# def split_and_vectorize_data(data, labels):
+#     train_data, test_data, train_labels, test_labels = train_test_split(data.values.astype('U'),
+#                                                                         labels, test_size=0.2, random_state=1)
+#
+#     count_vectorizer = CountVectorizer(stop_words='english')
+#     count_vectorizer.fit(data.values.astype('U'))
+#     train_counts = count_vectorizer.transform(train_data)
+#     test_counts = count_vectorizer.transform(test_data)
+#
+#     print("Num Train Data: " + str(len(train_data)))
+#     print("Num Test Data: " + str(len(test_data)))
+#
+#     return count_vectorizer, train_counts, test_counts, train_labels, test_labels
 
-def fit_multi_NB(train_counts, test_counts, train_labels, test_labels):
-    classifier = MultinomialNB()
-    classifier.fit(train_counts, train_labels)
 
-    predictions = classifier.predict(test_counts)
-
-    print("Accuracy score for multi NB: {0:.2f}".format(accuracy_score(test_labels, predictions)))
-
-    return accuracy_score(test_labels, predictions)
+# def fit_multi_NB(train_counts, test_counts, train_labels, test_labels):
+#     classifier = MultinomialNB()
+#     classifier.fit(train_counts, train_labels)
+#
+#     predictions = classifier.predict(test_counts)
+#
+#     print("Accuracy score for multi NB: {0:.2f}".format(accuracy_score(test_labels, predictions)))
+#
+#     return accuracy_score(test_labels, predictions)
 
 
 # def random_forest(train_counts, test_counts, train_labels, test_labels):
