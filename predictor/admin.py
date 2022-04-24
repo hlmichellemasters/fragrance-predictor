@@ -24,4 +24,3 @@ class HouseAdmin(ImportExportMixin, admin.ModelAdmin):
     model = House
     list_display = ('id', 'name')
     search_fields = ('name',)
-    

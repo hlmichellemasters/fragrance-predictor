@@ -16,7 +16,7 @@ class Perfume(models.Model):
     house = models.CharField(max_length=100)
     house_link = models.ForeignKey(House, related_name='perfumes', null=True, on_delete=models.CASCADE)
     description = models.TextField()
-    added_date = models.DateTimeField(default=timezone.now)
+    added_date = models.DateTimeField(auto_now_add=True)
     added_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
@@ -28,7 +28,7 @@ class Perfume(models.Model):
         return self.name + ' by ' + self.house
 
     def get_absolute_url(self):
-        return reverse('perfume-detail', kwargs={'pk':self.pk})
+        return reverse('perfume-detail', kwargs={'pk': self.pk})
 
 
 class Preference(models.Model):
@@ -36,7 +36,7 @@ class Preference(models.Model):
     perfume = models.ForeignKey(Perfume, on_delete=models.CASCADE)
     love = models.BooleanField()
     comment = models.CharField(max_length=200, null=True)
-    review_date = models.DateTimeField(default=timezone.now)
+    review_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         love_string = ""

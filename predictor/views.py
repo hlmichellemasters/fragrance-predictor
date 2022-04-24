@@ -15,6 +15,7 @@ class PerfumeListView(ListView):
     paginate_by = 10
 
 
+# can combine with above view with keywarg args ie. if perfumelist/user vs. just perfumelist/
 class UserPerfumeListView(ListView):
     model = Perfume
     template_name = 'predictor/user_perfumes_list.html'
@@ -27,7 +28,7 @@ class UserPerfumeListView(ListView):
 
 
 def perfume_detail(request, pk):
-    perfume = get_object_or_404(Perfume, pk=pk)
+    perfume = get_object_or_404(Perfume, id=pk)
     form = ReviewForm()
 
     return render(request, 'predictor/perfume_detail.html', {'perfume': perfume, 'form': form})
