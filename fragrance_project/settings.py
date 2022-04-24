@@ -19,6 +19,7 @@ import environ
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env = environ.Env()
 env.read_env(os.path.join(BASE_DIR, '.env'))
+# create .env file where in same dir as manage.py
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -91,9 +92,7 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-if not DEBUG:
-    DATABASES["default"] = dj_database_url.config(
-        conn_max_age=600, ssl_require=True)
+
 
 
 # Password validation
