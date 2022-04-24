@@ -38,7 +38,7 @@
 
     <img class="rounded-circle article-img" src="{{ perfume.added_by.profile.image.url }}">
     <div class="media-body">
-        <h4><a class="article-title" href="{% perfume.get_absolute_url %}">{{ perfume.name }} by
+        <h4><a class="article-title" href="{{ perfume.get_absolute_url }}">{{ perfume.name }} by
             {{ perfume.house}} </a></h4>
         <h5> Our confidence that you will like it: {{ percent }}%</h5>
         <p class="article-content">Description: {{ perfume.description }}</p>
