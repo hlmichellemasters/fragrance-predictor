@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
 import django_on_heroku
-import dj_database_url
 import environ
 
 
@@ -89,11 +88,18 @@ WSGI_APPLICATION = 'fragrance_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3.backup'),
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
 
 
+# DATABASES
+# ------------------------------------------------------------------------------
+
+DATABASES["default"] = env.db("DATABASE_URL")  # noqa F405
+DATABASES["default"]["ATOMIC_REQUESTS"] = True  # noqa F405  # noqa F405
+
+django_on_heroku.settings(locals(), staticfiles=False)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
@@ -173,5 +179,3 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 AWS_S3_REGION_NAME = 'us-east-2'
 AWS_S3_ADDRESSING_STYLE = 'virtual'
 AWS_S3_SIGNATURE_VERSION = 's3v4'
-
-django_on_heroku.settings(locals(), staticfiles=False)
