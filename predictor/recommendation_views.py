@@ -65,11 +65,11 @@ def user_recommendation_list(request):
         percent_confidence.append(this_percent)
         top_perfume = Perfume.objects.get(pk=perfume_id)
         recommended_perfumes.append(top_perfume)
-        perfumes = zip(recommended_perfumes, percent_confidence)
+        perfumes_and_scores = zip(recommended_perfumes, percent_confidence)
 
     return render(request, 'predictor/user_recommendation_list.html', {'username': request.user.username,
                                                                        'accuracyScore': accuracy,
-                                                                       'perfumes': perfumes,
+                                                                       'perfumes': perfumes_and_scores,
                                                                        'percent-confidence': percent_confidence,
                                                                        })
 
@@ -77,38 +77,43 @@ def user_recommendation_list(request):
 def recommendation_form(request):
     if request.POST:
         form = RecommendationForm(request.POST)
+        # for form submissions, if valid, clean data back to objects (from strings)
         if form.is_valid():
             notes_loves = form.cleaned_data['other_notes_loves']
             notes_not_loves = form.cleaned_data['other_notes_not_loves']
             perfume_loves = form.cleaned_data['perfume_loves']
             perfume_not_loves = form.cleaned_data['perfume_not_loves']
 
+            # if they marked any perfumes put them in dataframes
             if perfume_loves:
                 loves_df = pd.DataFrame([p.__dict__ for p in perfume_loves])
+            # otherwise create empty dataframe
             else:
                 loves_df = pd.DataFrame(columns=['id'])
-
+            # same for not-loved perfumes
             if perfume_not_loves:
                 not_loves_df = pd.DataFrame([p.__dict__ for p in perfume_not_loves])
             else:
                 not_loves_df = pd.DataFrame(columns=['id'])
-
+            # find the recommended perfumes and scores from the features
             perfumes = find_perfumes_from_features(notes_loves, notes_not_loves, loves_df, not_loves_df)
 
-            not_loves_list = notes_not_loves.split()
+            # these 2 lines were used for debugging
+            # not_loves_list = notes_not_loves.split()
             # table = DataFrame.to_html(not_loves_df)
 
             return render(request, 'predictor/recommendation_list.html', {
                                                                           # 'table': table,
                                                                           'form': form,
                                                                           'perfumes': perfumes,
-                                                                          'loves_df': loves_df,
-                                                                          'not_loves_df': not_loves_df,
+                                                                          # 'loves_df': loves_df,
+                                                                          # 'not_loves_df': not_loves_df,
                                                                           'perfume_loves': perfume_loves,
                                                                           'perfume_not_loves': perfume_not_loves,
                                                                           'notes_loves': notes_loves,
                                                                           'notes_not_loves': notes_not_loves,
-                                                                          'not_loves_list': not_loves_list})
+                                                                          # 'not_loves_list': not_loves_list
+                                                                            })
 
     else:
         form = RecommendationForm()
