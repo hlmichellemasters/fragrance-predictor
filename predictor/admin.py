@@ -31,3 +31,8 @@ class HouseAdmin(ImportExportModelAdmin):
     model = House
     list_display = ('id', 'name')
     search_fields = ('name',)
+
+
+admin.site.register(Perfume, PerfumeAdmin)
+admin.site.register(House, HouseAdmin)
+admin.site.register(Preference, PreferenceAdmin)
